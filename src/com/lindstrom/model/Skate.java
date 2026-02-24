@@ -1,4 +1,6 @@
-package com.lindstrom.item;
+package com.lindstrom.model;
+
+import com.lindstrom.pricing.PricePolicy;
 
 public class Skate extends Item {
     private int size;
@@ -7,6 +9,10 @@ public class Skate extends Item {
         super(brand);
         this.size = size;
 
+    }
+    @Override
+    public double getRentalCost(int days, PricePolicy pricePolicy) {
+        return pricePolicy.calculatePrice(150, days);
     }
 
     public int getSize() {
