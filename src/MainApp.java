@@ -137,7 +137,7 @@ public class MainApp extends Application {
         );
 
 
-        // Medlemssektion med KONTROLLER
+        // Medlemssektion med kontroller
         ComboBox<String> itemTypeCombo = new ComboBox<>();
 
 
