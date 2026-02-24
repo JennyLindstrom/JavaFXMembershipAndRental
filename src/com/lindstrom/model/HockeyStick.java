@@ -1,4 +1,6 @@
-package com.lindstrom.item;
+package com.lindstrom.model;
+
+import com.lindstrom.pricing.PricePolicy;
 
 public class HockeyStick extends Item {
     private String flex;
@@ -11,6 +13,10 @@ public class HockeyStick extends Item {
         this.flex = flex;
         this.hand = hand;
         this.material = material;
+    }
+    @Override
+    public double getRentalCost(int days, PricePolicy pricePolicy) {
+        return pricePolicy.calculatePrice(75, days);
     }
 
     public String getFlex() {

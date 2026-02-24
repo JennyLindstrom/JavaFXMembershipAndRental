@@ -1,4 +1,6 @@
-package com.lindstrom.item;
+package com.lindstrom.model;
+
+import com.lindstrom.pricing.PricePolicy;
 
 public abstract class Item {
     private final String id;
@@ -11,18 +13,13 @@ public abstract class Item {
         this.brand = brand;
         this.available = true;
     }
+    public abstract double getRentalCost(int days, PricePolicy pricePolicy);
 
     public String getId() {
         return id;
     }
 
-    public String getBrand() {
-        return brand;
-    }
-
-    public void setBrand(String brand) {
-        this.brand = brand;
-    }
+    public String getBrand() {return brand; }
 
     public boolean isAvailable() {
         return available;

@@ -1,398 +1,184 @@
-import com.lindstrom.item.Helmet;
-import com.lindstrom.item.HockeyStick;
-import com.lindstrom.item.Inventory;
-import com.lindstrom.item.Skate;
-import com.lindstrom.member.Member;
-import com.lindstrom.member.MemberRegistry;
-import com.lindstrom.member.MembershipService;
-import com.lindstrom.rental.Rental;
-import com.lindstrom.rental.RentalService;
+//import com.lindstrom.model.Helmet;
+//import com.lindstrom.model.HockeyStick;
+//import com.lindstrom.repository.Inventory;
+//import com.lindstrom.model.Skate;
+//import com.lindstrom.model.Member;
+//import com.lindstrom.repository.MemberRegistry;
+//import com.lindstrom.service.MembershipService;
+//import com.lindstrom.model.Rental;
+//import com.lindstrom.service.RentalService;
+//import javafx.collections.FXCollections;
+//import javafx.collections.ObservableList;
+//
+//import java.time.LocalDate;
+//import java.util.stream.Collectors;
+//
+//public class Menu {
+//    private final Inventory inventory;
+//    private final MemberRegistry memberRegistry;
+//    private final RentalService rentalService;
+//    private final MembershipService membershipService;
+//
+//
+//    public Menu(Inventory inventory, MemberRegistry memberRegistry,
+//                RentalService rentalService, MembershipService membershipService) {
+//        this.inventory = inventory;
+//        this.memberRegistry = memberRegistry;
+//        this.rentalService = rentalService;
+//        this.membershipService = membershipService;
+//
+//    }
+//    //Medlemmar
+//
+//    public Member addMember(String name, String status) {
+//        return membershipService.addMember(name, status);
+//    }
+//
+//    public boolean removeMember(int id) {
+//        return membershipService.removeMember(id);
+//    }
+//
+//    public ObservableList<Member> listAllMembers() {
+//        return FXCollections.observableArrayList(membershipService.listAllMembers());
+//    }
 
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Scanner;
+//    public ObservableList<Member> searchMembersByName(String searchName) {
+//        return FXCollections.observableArrayList(membershipService.searchMembersByName(searchName));
+//    }
+//    public ObservableList<Member> getAllMembers() {
+//        return FXCollections.observableArrayList(listAllMembers());
+//    }
+//
+//    public ObservableList<Member> getMembersByName(String name) {
+//        return FXCollections.observableArrayList(searchMembersByName(name));
+//    }
+//
+//    //Uthyrning
+//    public Helmet addHelmet(String brand, String size) {
+//        Helmet helmet = new Helmet(brand, size);
+//        inventory.addItem(helmet);
+//        return helmet;
+//    }
+//
+//    public Skate addSkate(String brand, int size) {
+//        Skate skate = new Skate(brand, size);
+//        inventory.addItem(skate);
+//        return skate;
+//    }
+//
+//    public HockeyStick addHockeyStick(String brand, String material, String flex, String hand) {
+//        HockeyStick hockeyStick = new HockeyStick(brand, material, flex, hand);
+//        inventory.addItem(hockeyStick);
+//        return hockeyStick;
+//    }
+//
+//    public ObservableList<Helmet> getAvailableHelmets() {
+//        return FXCollections.observableList(
+//                inventory.filterByType(Helmet.class).stream()
+//                        .filter(Helmet::isAvailable)
+//                        .collect(Collectors.toList())
+//        );
+//    }
+//
+//    public ObservableList<Skate> getAvailableSkates() {
+//        return FXCollections.observableList(
+//                inventory.filterByType(Skate.class).stream()
+//                        .filter(Skate::isAvailable)
+//                        .collect(Collectors.toList())
+//        );
+//    }
+//
+//    public ObservableList<HockeyStick> getAvailableHockeySticks() {
+//        return FXCollections.observableList(
+//                inventory.filterByType(HockeyStick.class).stream()
+//                        .filter(HockeyStick::isAvailable)
+//                        .collect(Collectors.toList())
+//        );
+//    }
+//
+//    public Rental rentHelmet(int memberId, String itemId, LocalDate startDate, LocalDate endDate) {
+//        return rentalService.rentItem(memberId, itemId, startDate, endDate);
+//    }
+//
+//    public Rental rentSkate(int memberId, String itemId, LocalDate startDate, LocalDate endDate) {
+//        return rentalService.rentItem(memberId, itemId, startDate, endDate);
+//    }
+//
+//    public Rental rentHockeyStick(int memberId, String itemId, LocalDate startDate, LocalDate endDate) {
+//        return rentalService.rentItem(memberId, itemId, startDate, endDate);
+//    }
 
-public class Menu {
-    private final Scanner scanner = new Scanner(System.in);
-
-    private final Inventory inventory;
-    private final MemberRegistry memberRegistry;
-    private final RentalService rentalService;
-    private final MembershipService membershipService;
-
-    public Menu(Inventory inventory, MemberRegistry memberRegistry,
-                RentalService rentalService, MembershipService membershipService) {
-        this.inventory = inventory;
-        this.memberRegistry = memberRegistry;
-        this.rentalService = rentalService;
-        this.membershipService = membershipService;
-    }
-
-    public void start() {
-        boolean running = true;
-        while (running) {
-            System.out.println("\n--- VALBO HC Medlemsregister och uthyrningsregister ---");
-            System.out.println("1. Medlemmar");
-            System.out.println("2. Utrustning");
-            System.out.println("3. Hyra/Avsluta Hyrningar");
-            System.out.println("0. Avsluta");
-            System.out.print("Ange val: ");
-            int choice = readInt();
-
-            switch (choice) {
-                case 1 -> memberMenu();
-                case 2 -> equipmentMenu();
-                case 3 -> rentalMenu();
-                case 0 -> running = false;
-                default -> System.out.println("Ogiltigt val, försök igen!");
-            }
-        }
-        System.out.println("Avslutar programmet.");
-    }
-
-    private void memberMenu() {
-        boolean inMenu = true;
-        while (inMenu) {
-            System.out.println("\n--- Medlemsmeny ---");
-            System.out.println("1. Lägg till medlem");
-            System.out.println("2. Ta bort medlem");
-            System.out.println("3. Lista medlemmar");
-            System.out.println("4. Sök medlem efter namn");
-            System.out.println("5. Lista medlemmar efter status");
-            System.out.println("0. Tillbaka");
-            System.out.print("Ange val: ");
-
-            int choice = readInt();
-
-            switch (choice) {
-                case 1 -> addMember();
-                case 2 -> removeMember();
-                case 3 -> listMembers();
-                case 4 -> searchMember();
-                case 5 -> filterMembersByStatus();
-                case 0 -> inMenu = false;
-                default -> System.out.println("Ogiltigt val, försök igen!");
-            }
-        }
-    }
-
-    private void equipmentMenu() {
-        boolean inMenu = true;
-        while (inMenu) {
-            System.out.println("\n--- Utrustningsmeny ---");
-            System.out.println("1. Lägg till hjälm");
-            System.out.println("2. Lägg till skridsko");
-            System.out.println("3. Lägg till klubba");
-            System.out.println("4. Lista tillgängliga hjälmar");
-            System.out.println("5. Lista tillgängliga skridskor");
-            System.out.println("6. Lista tillgängliga klubbor");
-            System.out.println("0. Tillbaka");
-            System.out.print("Ange val: ");
-
-            int choice = readInt();
-
-            switch (choice) {
-                case 1 -> addHelmet();
-                case 2 -> addSkate();
-                case 3 -> addHockeyStick();
-                case 4 -> listAvailableHemlet();
-                case 5 -> listAvailableSkate();
-                case 6 -> listAvailableHockeyStick();
-                case 0 -> inMenu = false;
-                default -> System.out.println("Ogiltigt val, försök igen!");
-            }
-        }
-    }
-
-    private void rentalMenu() {
-        boolean inMenu = true;
-        while (inMenu) {
-            System.out.println("\n--- Uthyrningsmeny ---");
-            System.out.println("1. Hyr hjälm");
-            System.out.println("2. Hyr skridskor");
-            System.out.println("3. Hyr klubba");
-            System.out.println("4. Avsluta hyrning");
-            System.out.println("5. Visa pågående uthyrningar");
-            System.out.println("6. Visa intäkter");
-            System.out.println("0. Tillbaka");
-            System.out.print("Ange val: ");
-
-            int choice = readInt();
-
-            switch (choice) {
-                case 1 -> rentHelmet();
-                case 2 -> rentSkate();
-                case 3 -> rentHockeyStick();
-                case 4 -> endRental();
-                case 5 -> listActiveRentals();
-                case 6 -> showTotalRevenue();
-                case 0 -> inMenu = false;
-                default -> System.out.println("Ogiltigt val, försök igen!");
-            }
-        }
-    }
-
-    private void addMember() {
-        System.out.print("Namn på medlem: ");
-        String name = scanner.nextLine();
-        System.out.print("Statusnivå (Standard/Junior): ");
-        String status = scanner.nextLine();
-        Member member = membershipService.addMember(name, status);
-        System.out.println("Medlem tillagd: " + member);
-    }
-
-    private void removeMember() {
-        System.out.print("Ange medlems-ID att ta bort: ");
-        int id = readInt();
-        if (membershipService.removeMember(id)) {
-            System.out.println("Medlem borttagen.");
-        } else {
-            System.out.println("Medlemmen finns ej.");
-        }
-    }
-
-    private void listMembers() {
-        System.out.println("\n--- Medlemslista ---");
-        for (Member m : membershipService.listAllMembers()) {
-            System.out.println(m);
-        }
-    }
-
-    private void searchMember() {
-        System.out.print("Ange namn eller del av namn att söka: ");
-        String searchTerm = scanner.nextLine();
-        List<Member> results = membershipService.searchMembersByName(searchTerm);
-        if (results.isEmpty()) {
-            System.out.println("Inga medlemmar matchade sökningen.");
-        } else {
-            System.out.println("Matchande medlemmar:");
-            for (Member m : results) {
-                System.out.println(m);
-            }
-        }
-    }
-
-    private void filterMembersByStatus() {
-        System.out.print("Ange status att filtrera på (Standard/Junior): ");
-        String status = scanner.nextLine();
-        List<Member> filtered = membershipService.filterMembersByStatus(status);
-        if (filtered.isEmpty()) {
-            System.out.println("Inga medlemmar med status " + status);
-        } else {
-            System.out.println("Medlemmar med status " + status + ":");
-            for (Member m : filtered) {
-                System.out.println(m);
-            }
-        }
-    }
-
-    private void addHelmet() {
-        System.out.print("Märke: ");
-        String brand = scanner.nextLine();
-        System.out.print("Storlek: ");
-        String size = scanner.nextLine();
-        Helmet gear = new Helmet(brand, size);
-        inventory.addItem(gear);
-        System.out.println("Hjälm tillagd: " + gear);
-    }
-
-    private void addSkate() {
-        System.out.print("Märke: ");
-        String brand = scanner.nextLine();
-        System.out.print("Storlek : ");
-        int size = scanner.nextInt();
-        Skate skate = new Skate(brand, size);
-        inventory.addItem(skate);
-        System.out.println("Skridsko tillagd: " + skate);
-    }
-
-    private void addHockeyStick() {
-        System.out.print("Märke : ");
-        String brand = scanner.nextLine();
-        System.out.print("Flex på klubban : ");
-        String flex = scanner.nextLine();
-        System.out.print("Fattnig på klubban : ");
-        String hand = scanner.nextLine();
-        System.out.print("Material : ");
-        String material = scanner.nextLine();
-        HockeyStick stick = new HockeyStick(brand, material, flex, hand);
-        inventory.addItem(stick);
-        System.out.println("Hockeykklibba tillagd: " + stick);
-    }
-
-    private void listAvailableHemlet() {
-        System.out.println("\n--- Tillgängliga hjälmar ---");
-        for (Helmet h : inventory.filterByType(Helmet.class)) {
-            if (h.isAvailable()) {
-                System.out.println(h);
-            }
-        }
-    }
-
-    private void listAvailableSkate() {
-        System.out.println("\n--- Tillgängliga skridskor ---");
-        for (Skate s : inventory.filterByType(Skate.class)) {
-            if (s.isAvailable()) {
-                System.out.println(s);
-            }
-        }
-    }
-
-    private void listAvailableHockeyStick() {
-        System.out.println("\n--- Tillgängliga klubbor ---");
-        for (HockeyStick hs : inventory.filterByType(HockeyStick.class)) {
-            if (hs.isAvailable()) {
-                System.out.println(hs);
-            }
-        }
-    }
-
-    private void rentHelmet() {
-        List<Member> listAllMembers = membershipService.listAllMembers();
-        for (Member m : listAllMembers) {
-            System.out.println(m);
-        }
-        List<Helmet> available = inventory.filterByType(Helmet.class);
-        if (available.isEmpty()) {
-            System.out.println("Ingen hjälm tillgängligt för uthyrning.");
-            return;
-        }
-        System.out.println("\n--- Tillgängliga hjälmar ---");
-        for (int i = 0; i < available.size(); i++) {
-            Helmet h = available.get(i);
-            System.out.println((i + 1) + ". " + h);
-        }
-        System.out.print("Ange medlems-ID: ");
-        int memId = readInt();
-        System.out.print("Välj hjälm med nummer: ");
-        int choice = readIntInRange(1, available.size());
-        Helmet selected = available.get(choice - 1);
-        System.out.print("Startdatum (ÅÅÅÅ-MM-DD): ");
-        LocalDate start = LocalDate.parse(scanner.nextLine());
-        System.out.print("Slutdatum (ÅÅÅÅ-MM-DD): ");
-        LocalDate end = LocalDate.parse(scanner.nextLine());
-        Rental rental = rentalService.rentItem(memId, selected.getId(), start, end);
-        if (rental != null) {
-            System.out.println("Hyrning genomförd: " + rental);
-        } else {
-            System.out.println("Det gick ej att boka. Kontrollera medlems-ID och att hjälmen är ledig!");
-        }
-    }
-
-    private void rentSkate() {
-        List<Member> listAllMembers = membershipService.listAllMembers();
-        for (Member m : listAllMembers) {
-            System.out.println(m);
-        }
-        List<Skate> available = inventory.filterByType(Skate.class);
-        if (available.isEmpty()) {
-            System.out.println("Inga tillgängliga skridskor för uthyrning.");
-            return;
-        }
-        System.out.println("\n--- Tillgängliga skridskor ---");
-        for (int i = 0; i < available.size(); i++) {
-            Skate s = available.get(i);
-            System.out.println((i + 1) + ". " + s);
-        }
-        System.out.print("Ange medlems-ID: ");
-        int memId = readInt();
-        System.out.print("Välj skridsko med nummer: ");
-        int choice = readIntInRange(1, available.size());
-        Skate selected = available.get(choice - 1);
-        System.out.print("Startdatum (ÅÅÅÅ-MM-DD): ");
-        LocalDate start = LocalDate.parse(scanner.nextLine());
-        System.out.print("Slutdatum (ÅÅÅÅ-MM-DD): ");
-        LocalDate end = LocalDate.parse(scanner.nextLine());
-        Rental rental = rentalService.rentItem(memId, selected.getId(), start, end);
-        if (rental != null) {
-            System.out.println("Hyrning genomförd: " + rental);
-        } else {
-            System.out.println("Det gick ej att boka. Kontrollera medlems-ID och att skridskon är ledig!");
-        }
-    }
-
-    private void rentHockeyStick() {
-        List<Member> listAllMembers = membershipService.listAllMembers();
-        for (Member m : listAllMembers) {
-            System.out.println(m);
-        }
-        List<HockeyStick> available = inventory.filterByType(HockeyStick.class);
-        if (available.isEmpty()) {
-            System.out.println("Inga tillgängliga klubbor för uthyrning.");
-            return;
-        }
-        System.out.println("\n--- Tillgängliga klubbor ---");
-        for (int i = 0; i < available.size(); i++) {
-            HockeyStick hs = available.get(i);
-            System.out.println((i + 1) + ". " + hs);
-        }
-        System.out.print("Ange medlems-ID: ");
-        int memId = readInt();
-        System.out.print("Välj klubba med nummer: ");
-        int choice = readIntInRange(1, available.size());
-        HockeyStick selected = available.get(choice - 1);
-        System.out.print("Startdatum (ÅÅÅÅ-MM-DD): ");
-        LocalDate start = LocalDate.parse(scanner.nextLine());
-        System.out.print("Slutdatum (ÅÅÅÅ-MM-DD): ");
-        LocalDate end = LocalDate.parse(scanner.nextLine());
-        Rental rental = rentalService.rentItem(memId, selected.getId(), start, end);
-        if (rental != null) {
-            System.out.println("Hyrning genomförd: " + rental);
-        } else {
-            System.out.println("Det gick ej att boka. Kontrollera medlems-ID och att klubban är ledig!");
-        }
-    }
-
-    private void endRental() {
-        listActiveRentals();
-        System.out.print("Ange utrustnings-ID för hyrning som ska avslutas: ");
-        String itemId = scanner.nextLine();
-        Rental rental = null;
-        for (Rental r : rentalService.getActiveRentals()) {
-            if (r.getItem().getId().equals(itemId)) {
-                rental = r;
-                break;
-            }
-        }
-        if (rental == null) {
-            System.out.println("Ingen pågående uthyrning för valt ID.");
-            return;
-        }
-        System.out.print("Avslutsdatum (ÅÅÅÅ-MM-DD): ");
-        LocalDate retDate = LocalDate.parse(scanner.nextLine());
-        double total = rentalService.endRental(rental, retDate);
-        System.out.println("Hyra avslutad. Slutpris: " + total + " kr");
-    }
-
-    private void listActiveRentals() {
-        System.out.println("\n--- Pågående uthyrningar ---");
-        for (Rental r : rentalService.getActiveRentals()) {
-            System.out.println(r);
-        }
-    }
-
-    private void showTotalRevenue() {
-        System.out.println("Totala intäkter: " + rentalService.getTotalRevenue() + " kr");
-    }
-
-    private int readInt() {
-        while (true) {
-            try {
-                String input = scanner.nextLine();
-                return Integer.parseInt(input.trim());
-            } catch (NumberFormatException e) {
-                System.out.print("Felaktig siffra, försök igen: ");
-            }
-        }
-    }
-
-    private int readIntInRange(int min, int max) {
-        while (true) {
-            int choice = readInt();
-            if (choice >= min && choice <= max) {
-                return choice;
-            }
-            System.out.print("Valet måste vara mellan " + min + " och " + max + ", försök igen: ");
-        }
-    }
-}
+//    public double endRental(Rental rental, LocalDate returnDate) {
+//        if (rental == null || !rentalService.getActiveRentals().contains(rental)) {
+//            return -1;
+//        }
+//
+//        return rentalService.endRental(rental, returnDate);
+//    }
+//
+//    public ObservableList<Rental> getAvailableRentals() {
+//        return FXCollections.observableArrayList(rentalService.getActiveRentals());
+//
+//    }
+//
+//    public double getTotalRevenue() {
+//        return rentalService.getTotalRevenue();
+//    }
+//
+//
+//
+//    private static void addSampleData(Inventory inventory, MembershipService membershipService) {
+//
+//        //Medlemmar
+//        membershipService.addMember("Anna Andersson", "Junior");
+//        membershipService.addMember("Bertil Bengtsson", "Junior");
+//        membershipService.addMember("Cecilia Karlsson", "Senior");
+//        membershipService.addMember("David Danielsson", "Senior");
+//        membershipService.addMember("Emma Eriksson", "Senior");
+//        membershipService.addMember("Fanny Fransson", "Junior");
+//        membershipService.addMember("Göran Göransson", "Senior");
+//        membershipService.addMember("Håkan Henriksson", "Junior");
+//        membershipService.addMember("Isebelle Isaksson", "Senior");
+//
+//
+//        //Skyddsutrustning
+//        inventory.addItem(new Helmet("Medium", "CCN"));
+//        inventory.addItem(new Helmet("Small", "Bauer"));
+//        inventory.addItem(new Helmet("Large", "CCN"));
+//        inventory.addItem(new Helmet("Small", "Bauer"));
+//        inventory.addItem(new Helmet("Medium", "CCN"));
+//        inventory.addItem(new Helmet("Small", "Bauer"));
+//        inventory.addItem(new Helmet("Large", "CCN"));
+//        inventory.addItem(new Helmet("Medium", "Bauer"));
+//        inventory.addItem(new Helmet("Small", "CCN"));
+//        inventory.addItem(new Helmet("Large", "Bauer"));
+//        inventory.addItem(new Helmet("Small", "CCN"));
+//        inventory.addItem(new Helmet("Medium", "Bauer"));
+//
+//
+//        //Klubbor
+//        inventory.addItem(new HockeyStick("Vapor CCN", "Composite", "85", "Right"));
+//        inventory.addItem(new HockeyStick("Snake CCN", "Composite", "80", "Left"));
+//        inventory.addItem(new HockeyStick("Vapor CCN", "Composite", "85", "Right"));
+//        inventory.addItem(new HockeyStick("CTX CCN", "Composite", "80", "Left"));
+//        inventory.addItem(new HockeyStick("WARRIOR HOCKEY", "Composite", "90", "Right"));
+//        inventory.addItem(new HockeyStick("Tyke Bauer", "Composite", "100", "Left"));
+//        inventory.addItem(new HockeyStick("WARRIOR HOCKEY", "Composite", "80", "Right"));
+//        inventory.addItem(new HockeyStick("JETSPEED Bauer", "Composite", "85", "Right"));
+//        inventory.addItem(new HockeyStick("Pulse Bauer", "Composite", "85", "Left"));
+//        inventory.addItem(new HockeyStick("Vapor CCN", "Composite", "85", "Left"));
+//
+//        //SKridskor
+//        inventory.addItem(new Skate("Jetspeed CCN", 38));
+//        inventory.addItem(new Skate("Jetspeed CCN", 39));
+//        inventory.addItem(new Skate("Jetspeed CCN", 37));
+//        inventory.addItem(new Skate("Jetspeed CCN", 40));
+//        inventory.addItem(new Skate("Jetspeed CCN", 41));
+//        inventory.addItem(new Skate("Jetspeed CCN", 42));
+//        inventory.addItem(new Skate("Jetspeed CCN", 43));
+//        inventory.addItem(new Skate("Jetspeed CCN", 44));
+//        inventory.addItem(new Skate("Jetspeed CCN", 36));
+//
+//
+//    }
+//}

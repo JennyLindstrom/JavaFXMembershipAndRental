@@ -1,8 +1,8 @@
 package com.lindstrom.pricing;
 
-import com.lindstrom.item.Item;
+import com.lindstrom.model.Item;
 
 public interface PricePolicy {
-    double calculatePrice(Item item, int days);
+    double calculatePrice(double basePrice, int days);
 
 }

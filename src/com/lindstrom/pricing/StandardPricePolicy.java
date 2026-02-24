@@ -1,12 +1,12 @@
 package com.lindstrom.pricing;
 
-import com.lindstrom.item.Item;
+import com.lindstrom.model.Item;
 
 public class StandardPricePolicy implements PricePolicy {
-    private static final double BASE_DAY_PRICE = 200.0;
+
 
     @Override
-    public double calculatePrice(Item item, int days) {
-        return BASE_DAY_PRICE * days;
+    public double calculatePrice(double basePrice, int days) {
+        return basePrice * days;
     }
 }
