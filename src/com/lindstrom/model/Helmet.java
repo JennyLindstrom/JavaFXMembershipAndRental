@@ -25,6 +25,7 @@ public class Helmet extends Item {
     public double getRentalCost(int days, PricePolicy pricePolicy) {
         return pricePolicy.calculatePrice(100, days);
     }
+
     @Override
     public String toString() {
         return "Hjälm" + super.toString() +

@@ -28,6 +28,7 @@ public class Rental {
     public double getTotalCost(PricePolicy pricePolicy) {
         return item.getRentalCost((int) getDurationDays(), pricePolicy);
     }
+
     public Member getMember() {
         return member;
 

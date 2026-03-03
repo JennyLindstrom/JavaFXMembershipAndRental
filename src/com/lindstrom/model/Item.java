@@ -5,7 +5,7 @@ import com.lindstrom.pricing.PricePolicy;
 public abstract class Item {
     private final String id;
     private static int counter = 1;
-    private String brand;
+    private final String brand;
     private boolean available;
 
     public Item(String brand) {
@@ -13,13 +13,16 @@ public abstract class Item {
         this.brand = brand;
         this.available = true;
     }
+
     public abstract double getRentalCost(int days, PricePolicy pricePolicy);
 
     public String getId() {
         return id;
     }
 
-    public String getBrand() {return brand; }
+    public String getBrand() {
+        return brand;
+    }
 
     public boolean isAvailable() {
         return available;

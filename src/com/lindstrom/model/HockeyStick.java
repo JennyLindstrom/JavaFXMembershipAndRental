@@ -14,6 +14,7 @@ public class HockeyStick extends Item {
         this.hand = hand;
         this.material = material;
     }
+
     @Override
     public double getRentalCost(int days, PricePolicy pricePolicy) {
         return pricePolicy.calculatePrice(75, days);
