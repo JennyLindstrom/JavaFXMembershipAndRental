@@ -1,7 +1,5 @@
 package com.lindstrom.pricing;
 
-import com.lindstrom.model.Item;
-
 public class StandardPricePolicy implements PricePolicy {
 
 

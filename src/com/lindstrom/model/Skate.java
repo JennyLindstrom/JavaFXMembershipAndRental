@@ -10,6 +10,7 @@ public class Skate extends Item {
         this.size = size;
 
     }
+
     @Override
     public double getRentalCost(int days, PricePolicy pricePolicy) {
         return pricePolicy.calculatePrice(150, days);
