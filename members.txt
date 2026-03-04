@@ -1,0 +1,10 @@
+Anna Andersson,Junior
+Bertil Bengtsson,Junior
+Cecilia Karlsson,Senior
+David Danielsson,Senior
+Emma Eriksson,Senior
+Fanny Fransson,Junior
+Göran Göransson,Senior
+Håkan Henriksson,Junior
+Isebelle Isaksson,Senior
+

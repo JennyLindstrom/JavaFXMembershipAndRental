@@ -1,0 +1,31 @@
+Skate,   Jetspeed CCM,   38
+Skate,   Jetspeed CCM,   39
+Skate,   Jetspeed CCM,   37
+Skate,   Jetspeed CCM,   40
+Skate,   Jetspeed CCM,   42
+Skate,   Jetspeed CCM,   43
+Skate,   Jetspeed CCM,   44
+Skate,   Jetspeed CCM,   36
+Skate,   Bauer,   46
+Helmet,   CCM,   Medium
+Helmet,   Bauer,   Small
+Helmet,   CCM,   Large
+Helmet,   Bauer,   Small
+Helmet,   CCM,   Medium
+Helmet,   Bauer,   Small
+Helmet,   CCM,   Large
+Helmet,   Bauer,   Medium
+Helmet,   CCM,   Small
+Helmet,   Bauer,   Large
+Helmet,   CCM,   Small
+Helmet,   Bauer,   Medium
+HockeyStick,   Vapor CCM,   Composite,   85,   Right
+HockeyStick,   Snake CCM,   Composite,   80,   Left
+HockeyStick,   Vapor CCM,   Composite,   85,   Right
+HockeyStick,   CTX CCM,   Composite,   80,   Left
+HockeyStick,   WARRIOR HOCKEY,   Composite,   90,   Right
+HockeyStick,   Tyke Bauer,   Composite,   100,   Left
+HockeyStick,   WARRIOR HOCKEY,   Composite,   80,   Right
+HockeyStick,   JETSPEED Bauer,   Composite,   85,   Right
+HockeyStick,   Pulse Bauer,   Composite,   85,   Left
+HockeyStick,   Vapor CCM,   Composite,   85,   Left
