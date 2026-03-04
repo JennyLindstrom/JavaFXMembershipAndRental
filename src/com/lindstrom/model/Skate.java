@@ -3,9 +3,9 @@ package com.lindstrom.model;
 import com.lindstrom.pricing.PricePolicy;
 
 public class Skate extends Item {
-    private int size;
+    private String size;
 
-    public Skate(String brand, int size) {
+    public Skate(String brand, String size) {
         super(brand);
         this.size = size;
 
@@ -16,11 +16,11 @@ public class Skate extends Item {
         return pricePolicy.calculatePrice(150, days);
     }
 
-    public int getSize() {
+    public String getSize() {
         return size;
     }
 
-    public void setSize(int size) {
+    public void setSize(String size) {
         this.size = size;
     }
 

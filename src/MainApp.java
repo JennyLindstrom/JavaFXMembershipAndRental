@@ -40,24 +40,31 @@ public class MainApp extends Application {
     private final ObservableList<Item> helmetItems = FXCollections.observableArrayList();
     private final ObservableList<Item> hockeyStickItems = FXCollections.observableArrayList();
     private final ObservableList<Item> skateItems = FXCollections.observableArrayList();
+    private double totalRevenue = 0.0;
 
     @Override
     public void start(Stage primaryStage) {
         loadDataFromFile();
 
         //Tabeller
+        setupHelmetColumns();
+        setupHockeyStickColumns();
+        setupSkateColumns();
         setupMemberTableView();
         setupSeperateTableView();
         setupRentalTable();
         updateStats();
 
 
-        //Knapp för att hyra
+        //Knapp för att hyra/asluta/spara data
         Button rentButton = new Button("Hyr vald artikel");
         rentButton.setOnAction(e -> handleRent());
 
         Button returnButton = new Button("Avsluta uthyrning");
         returnButton.setOnAction(e -> handleReturn());
+
+        Button saveButton = new Button("Spara data");
+        saveButton.setOnAction(e -> saveAllData());
 
 
         //Medlemskontroller
@@ -131,7 +138,7 @@ public class MainApp extends Application {
 
         VBox content = new VBox(10,
                 new Label("Medlemmar:"),
-                new HBox(10, new Label("Namn:"), nameField, new Label("Nivå:"), levelCombo, searchField),
+                new HBox(10, new Label("För- och efternamn:"), nameField, new Label("Nivå:"), levelCombo, searchField),
                 buttonRow,
                 memberTableView,
 
@@ -144,7 +151,7 @@ public class MainApp extends Application {
                 new Label("Skridskor:"), skateTable,
                 new Label("Uthyrningar:"), rentalTable,
                 new HBox(10, new Label("Statistik:"), statusLabel, revenueLabel),
-                new HBox(10, rentButton, returnButton)
+                new HBox(10, rentButton, returnButton, saveButton)
         );
         content.setStyle("-fx-padding: 12;");
         content.setStyle("-fx-padding: 12;");
@@ -159,11 +166,10 @@ public class MainApp extends Application {
     private void loadDataFromFile() {
         try {
             membershipService.loadFromFile("members.txt");
-
+            inventory.loadFromFile("inventory.txt");
             System.out.println("Data laddad från filer!");
         } catch (IOException e) {
             System.err.println("Fil saknas, laddar standarddata...");
-            loadDefaultData();
         }
     }
 
@@ -185,19 +191,19 @@ public class MainApp extends Application {
                 .filter(item -> item instanceof Helmet)
                 .collect(Collectors.toList()));
         helmetTable.setItems(helmetItems);
-        setupHelmetColumns();
+
 
         hockeyStickItems.setAll(inventory.getAllItems().stream()
                 .filter(item -> item instanceof HockeyStick)
                 .collect(Collectors.toList()));
         hockeyStickTable.setItems(hockeyStickItems);
-        setupHockeyStickColumns();
+
 
         skateItems.setAll(inventory.getAllItems().stream()
                 .filter(item -> item instanceof Skate)
                 .collect(Collectors.toList()));
         skateTable.setItems(skateItems);
-        setupSkateColumns();
+
     }
 
     private void setupSkateColumns() {
@@ -205,9 +211,9 @@ public class MainApp extends Application {
         brandCol.setCellValueFactory(d -> new javafx.beans.property.SimpleStringProperty(
                 d.getValue().getBrand()));
 
-        TableColumn<Item, Integer> sizeCol = new TableColumn<>("Storlek");
-        sizeCol.setCellValueFactory(d -> new javafx.beans.property.SimpleIntegerProperty(
-                ((Skate) d.getValue()).getSize()).asObject());
+        TableColumn<Item, String> sizeCol = new TableColumn<>("Storlek");
+        sizeCol.setCellValueFactory(d -> new javafx.beans.property.SimpleStringProperty(
+                ((Skate) d.getValue()).getSize()));
 
         TableColumn<Item, String> statusCol = new TableColumn<>("Status");
         statusCol.setCellValueFactory(d -> new javafx.beans.property.SimpleStringProperty(
@@ -218,6 +224,10 @@ public class MainApp extends Application {
     }
 
     private void setupHockeyStickColumns() {
+        TableColumn<Item, String> brandCol = new TableColumn<>("Märke");
+        brandCol.setCellValueFactory(d -> new javafx.beans.property.SimpleStringProperty(
+                d.getValue().getBrand()));
+
         TableColumn<Item, String> modelCol = new TableColumn<>("Material");
         modelCol.setCellValueFactory(d -> new javafx.beans.property.SimpleStringProperty(
                 ((HockeyStick) d.getValue()).getMaterial()));
@@ -233,7 +243,7 @@ public class MainApp extends Application {
         statusCol.setCellValueFactory(d -> new javafx.beans.property.SimpleStringProperty(
                 d.getValue().isAvailable() ? "Ledig" : "Uthyrd"));
 
-        hockeyStickTable.getColumns().addAll(modelCol, handCol, flexCol, statusCol);
+        hockeyStickTable.getColumns().addAll(brandCol, modelCol, handCol, flexCol, statusCol);
 
     }
 
@@ -313,6 +323,13 @@ public class MainApp extends Application {
             showAlert("Fel ", "Välj en uthyrning från tabellen först!");
             return;
         }
+
+        PricePolicy policy = selectedRental.getMember().getLevel().equalsIgnoreCase("Junior")
+                ? new JuniorPricePolicy() : new StandardPricePolicy();
+        double rentalCost = selectedRental.getTotalCost(policy);
+
+        totalRevenue += rentalCost;
+
         Item item = selectedRental.getItem();
         Member member = selectedRental.getMember();
 
@@ -333,7 +350,8 @@ public class MainApp extends Application {
         //Uppdaterar tabeller
         rentalTable.setItems(FXCollections.observableArrayList(rentals));
 
-        showAlert("Klart!", item.getBrand() + " är nu ledig igen (retunerad från " + member.getName() + ").");
+        showAlert("Klart!", item.getBrand() + " är nu ledig igen (retunerad från " + member.getName() + ")." +
+                " Inkomst + " + String.format("%.2f kr", rentalCost));
 
         updateStats();
     }
@@ -400,10 +418,6 @@ public class MainApp extends Application {
         memberTableView.setItems(FXCollections.observableArrayList(memberRegistry.getAllMembers()));
     }
 
-    private void clearFields(TextField nameField, TextField searchField) {
-        if (nameField != null) nameField.clear();
-        if (searchField != null) searchField.clear();
-    }
 
     private void deleteSelectedMember() {
         Member selectedMember = memberTableView.getSelectionModel().getSelectedItem();
@@ -448,7 +462,7 @@ public class MainApp extends Application {
 
             case "Skridskor":
                 try {
-                    int size = Integer.parseInt(sizeField.getText().trim());
+                    String size = sizeField.getText().trim();
                     inventory.addItem(new Skate(brand, size));
                 } catch (NumberFormatException e) {
                     showAlert("Fel", "Skridskostorlek måste vara siffra!");
@@ -457,8 +471,12 @@ public class MainApp extends Application {
                 break;
         }
 
+
         // Uppdatera tabeller och rensa fält
         setupSeperateTableView();
+        helmetTable.refresh();
+        hockeyStickTable.refresh();
+        skateTable.refresh();
         clearItemFields(brandField, sizeField, flexField, handField, materialField);
         showAlert("Klart!", "Ny " + type + " tillagd: " + brand);
     }
@@ -506,70 +524,21 @@ public class MainApp extends Application {
 
     private void updateStats() {
         int activeRentals = rentals.size();
-        double totalRevenue = 0;
 
-        for (Rental rental : rentals) {
-            PricePolicy policy =
-                    rental.getMember().getLevel().equalsIgnoreCase("Junior")
-                            ? new JuniorPricePolicy() : new StandardPricePolicy();
-            totalRevenue += rental.getTotalCost(policy);
-        }
         statusLabel.setText("Aktiva uthyrningar: " + activeRentals);
         revenueLabel.setText(String.format("Total intäkt: %.2f kr", totalRevenue));
     }
 
-    private void loadDefaultData() {
-        //Medlemmar
-        memberRegistry.addMember(new Member("Anna Andersson", "Junior"));
-        memberRegistry.addMember(new Member("Bertil Bengtsson", "Junior"));
-        memberRegistry.addMember(new Member("Cecilia Karlsson", "Senior"));
-        memberRegistry.addMember(new Member("David Danielsson", "Senior"));
-        memberRegistry.addMember(new Member("Emma Eriksson", "Senior"));
-        memberRegistry.addMember(new Member("Fanny Fransson", "Junior"));
-        memberRegistry.addMember(new Member("Göran Göransson", "Senior"));
-        memberRegistry.addMember(new Member("Håkan Henriksson", "Junior"));
-        memberRegistry.addMember(new Member("Isebelle Isaksson", "Senior"));
-
-
-        //Skyddsutrustning
-        inventory.addItem(new Helmet("CCM", "Medium"));
-        inventory.addItem(new Helmet("Bauer", "Small"));
-        inventory.addItem(new Helmet("CCM", "Large"));
-        inventory.addItem(new Helmet("Bauer", "Small"));
-        inventory.addItem(new Helmet("CCM", "Medium"));
-        inventory.addItem(new Helmet("Bauer", "Small"));
-        inventory.addItem(new Helmet("CCM", "Large"));
-        inventory.addItem(new Helmet("Bauer", "Medium"));
-        inventory.addItem(new Helmet("CCM", "Small"));
-        inventory.addItem(new Helmet("Bauer", "Large"));
-        inventory.addItem(new Helmet("CCM", "Small"));
-        inventory.addItem(new Helmet("Bauer", "Medium"));
-
-
-        //Klubbor
-        inventory.addItem(new HockeyStick("Vapor CCM", "Composite", "85", "Right"));
-        inventory.addItem(new HockeyStick("Snake CCM", "Composite", "80", "Left"));
-        inventory.addItem(new HockeyStick("Vapor CCM", "Composite", "85", "Right"));
-        inventory.addItem(new HockeyStick("CTX CCM", "Composite", "80", "Left"));
-        inventory.addItem(new HockeyStick("WARRIOR HOCKEY", "Composite", "90", "Right"));
-        inventory.addItem(new HockeyStick("Tyke Bauer", "Composite", "100", "Left"));
-        inventory.addItem(new HockeyStick("WARRIOR HOCKEY", "Composite", "80", "Right"));
-        inventory.addItem(new HockeyStick("JETSPEED Bauer", "Composite", "85", "Right"));
-        inventory.addItem(new HockeyStick("Pulse Bauer", "Composite", "85", "Left"));
-        inventory.addItem(new HockeyStick("Vapor CCM", "Composite", "85", "Left"));
-
-        //SKridskor
-        inventory.addItem(new Skate("Jetspeed CCM", 38));
-        inventory.addItem(new Skate("Jetspeed CCM", 39));
-        inventory.addItem(new Skate("Jetspeed CCM", 37));
-        inventory.addItem(new Skate("Jetspeed CCM", 40));
-        inventory.addItem(new Skate("Jetspeed CCM", 41));
-        inventory.addItem(new Skate("Jetspeed CCM", 42));
-        inventory.addItem(new Skate("Jetspeed CCM", 43));
-        inventory.addItem(new Skate("Jetspeed CCM", 44));
-        inventory.addItem(new Skate("Jetspeed CCM", 36));
-
+    private void saveAllData() {
+        try {
+            membershipService.saveToFile("members.txt");
+            inventory.saveToFile("inventory.txt");
+            showAlert("Sparat!", "Data sparad till filer!");
+        } catch (IOException e) {
+            showAlert("Fel", "Kunde inte spara data!");
+        }
     }
+
 
     public static void main(String[] args) {
         launch(args);
